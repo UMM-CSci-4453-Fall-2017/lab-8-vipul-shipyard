@@ -10,6 +10,8 @@ function ButtonCtrl($scope,buttonApi){
    $scope.refreshButtons=refreshButtons;
    $scope.buttonClick=buttonClick;
 
+   buttonApi.getTransaction();
+
    var loading = false;
 
    function isLoading(){
@@ -48,6 +50,10 @@ function buttonApi($http,apiUrl){
       var url = apiUrl+'/click?id='+id;
 //      console.log("Attempting with "+url);
       return $http.get(url); // Easy enough to do this way
+    }, 
+    getTransaction: function(id){
+      var url = apiUrl + '/getTrans';
+      return $http.get(url);
     }
  };
 }

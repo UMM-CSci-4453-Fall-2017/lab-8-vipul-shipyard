@@ -5,12 +5,13 @@ angular.module('buttons',[])
 
 function ButtonCtrl($scope,buttonApi){
    $scope.buttons=[]; //Initially all was still
+   $scope.transaction=[];
    $scope.errorMessage='';
    $scope.isLoading=isLoading;
    $scope.refreshButtons=refreshButtons;
    $scope.buttonClick=buttonClick;
 
-   buttonApi.getTransaction();
+   $scope.transaction = buttonApi.getTransaction();
 
    var loading = false;
 
@@ -33,7 +34,7 @@ function ButtonCtrl($scope,buttonApi){
   function buttonClick($event){
      $scope.errorMessage='';
      buttonApi.clickButton($event.target.id)
-        .success(function(){})
+        .success(function(){$scope.transaction = buttonApi.getTransaction()})
         .error(function(){$scope.errorMessage="Unable click";});
   }
   refreshButtons();  //make sure the buttons are loaded
@@ -50,8 +51,12 @@ function buttonApi($http,apiUrl){
       var url = apiUrl+'/click?id='+id;
 //      console.log("Attempting with "+url);
       return $http.get(url); // Easy enough to do this way
-    }, 
-    getTransaction: function(id){
+    },
+//};};
+
+//function transApi($http,apiURL){
+//  return{
+    getTransaction: function(){
       var url = apiUrl + '/getTrans';
       return $http.get(url);
     }

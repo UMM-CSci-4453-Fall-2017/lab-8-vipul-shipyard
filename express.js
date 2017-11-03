@@ -57,50 +57,23 @@ app.get("/buttons",function(req,res){
 
 app.get("/click",function(req,res){
   var id = req.param('id');
-  var sql = 'YOUR SQL HERE'
+  var sql = 'INSERT INTO ' + db + ".transaction_" + 1 + " values (" + id + ", 1) on duplicate key update quantity=quantity+1;";
   console.log("Attempting sql ->"+sql+"<-");
   
-
-  connection.query(sql,(function(res){return function(err,rows,fields){
-     if(err){console.log("We have an insertion error:");
-             	console.log(err);
-		res.status(500).send(err);}
-     else {res.send(rows);}
-	 // rows is a placeholder, probably want to send price or something
-  }})(res));
+  query(sql).then(function(results){ res.send(results); endPool;});
 });
 
 app.get("/getTrans", function(req, res){
   var ip = req.ip;
   console.log(ip);
-  var tableName = db + ".transaction_" + ip;
+  var tableName = db + ".transaction_" + 1;
   var modelTable = db + ".transaction_model";
   var sqlMake = "CREATE TABLE IF NOT EXISTS " + tableName + " LIKE " + modelTable + ";";
   var sqlGet = "SELECT * FROM " + tableName + ";";
 
-//  connection.query("USE " + db + ";", (function(err, rows, fields){
-//    if (err){ console.log("error switching database: " + err);
-//       res.status(500).send(err);
-//   }}));
    query(sqlMake)
    .then(query(sqlGet))
-   .then(function(results){ (res.send(results)); endPool;});
-//  connection.query(sql, (function(res){return function(err, rows, fields){
-//     if(err){ console.log("error creating transaction table: " + err); 
-//        res.status(500);
-//	res.senΘd(err);
-//        return;}
-    
-//     }})(res));
-
-//  connection.query("SELECT * FROM " + tableName + ";", (function(res){return function(err,rows, fields){
-//     if(err){console.log("error getting transaction: " + err);
-//        res.status(500);
-//	res.send(err);
- //       return;
-//     } else {
-//        res.send(rows);
-//     }}})(res));
+   .then(function(results){ res.send(results); endPool;});
 });
 
 

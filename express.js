@@ -38,7 +38,15 @@ var getDatabase = function(){
 	return toReturn;};
 
  
-
+var removeCol = function(ip){
+	var toReturn = "";
+	for(i = 0; i < ip.length; i++){
+		if (ip.charAt(i) != ":"){
+			toReturn = toReturn + ip.charAt(i);
+		}
+	}
+	return toReturn;
+};
 app.use(express.static(__dirname + '/public'));
 
 app.get("/buttons",function(req,res){
@@ -57,7 +65,8 @@ app.get("/buttons",function(req,res){
 
 app.get("/click",function(req,res){
   var id = req.param('id');
-  var sql = 'INSERT INTO ' + db + ".transaction_" + 1 + " values (" + id + ", 1) on duplicate key update quantity=quantity+1;";
+  var newIP = removeCol(req.ip);
+  var sql = 'INSERT INTO ' + db + ".transaction_" + newIP + " values (" + id + ", 1) on duplicate key update quantity=quantity+1;";
   console.log("Attempting sql ->"+sql+"<-");
   
   query(sql).then(function(results){ res.send(results); endPool;});
@@ -65,15 +74,34 @@ app.get("/click",function(req,res){
 
 app.get("/getTrans", function(req, res){
   var ip = req.ip;
-  console.log(ip);
-  var tableName = db + ".transaction_" + 1;
+  var newIP = removeCol(ip);
+  //console.log(ip);
+  //console.log(newIP);
+  var tableName = db + ".transaction_" + newIP;
   var modelTable = db + ".transaction_model";
   var sqlMake = "CREATE TABLE IF NOT EXISTS " + tableName + " LIKE " + modelTable + ";";
-  var sqlGet = "SELECT * FROM " + tableName + ";";
+//  var sqlGet = "SELECT * FROM " + tableName + ";";
+  var sqlGet = "select inventory.item, inventory.id, " + tableName + ".quantity, " + tableName + ".quantity * prices.prices AS total from benek020.inventory as inventory, " + tableName + ", benek020.prices as prices where inventory.id = " + tableName + ".ID and inventory.id = prices.id;";
+
+
 
    query(sqlMake)
-   .then(query(sqlGet))
-   .then(function(results){ res.send(results); endPool;});
+   .then(query(sqlGet)
+   .then(function(results){ res.send(results); endPool;}));
+});
+
+app.get("/removeItem", function(req, res){
+    var id = req.param('id');
+    var ip = req.ip;
+    var newIP = removeCol(ip);
+    var tablename = db + ".transaction_" + newIP;
+    var updateSql = "update " + tablename + " set quantity = quantity - 1 where ID = " + id + ";";
+    var deleteSql = "delete from " + tablename + " where quantity <= 0;";
+   // var SQL = updateSql + deleteSql;
+
+    query(updateSql)
+    .then(query(deleteSql))
+    .then(function(results){ res.send(results);endPool;});
 });
 
 

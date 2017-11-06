@@ -10,8 +10,8 @@ function ButtonCtrl($scope,buttonApi){
    $scope.isLoading=isLoading;
    $scope.refreshButtons=refreshButtons;
    $scope.buttonClick=buttonClick;
-
-   $scope.transaction = buttonApi.getTransaction();
+   $scope.refreshTrans=refreshTrans;
+   $scope.subOne = subOne;
 
    var loading = false;
 
@@ -34,11 +34,29 @@ function ButtonCtrl($scope,buttonApi){
   function buttonClick($event){
      $scope.errorMessage='';
      buttonApi.clickButton($event.target.id)
-        .success(function(){$scope.transaction = buttonApi.getTransaction()})
+        .success(function(){refreshTrans()})
         .error(function(){$scope.errorMessage="Unable click";});
   }
-  refreshButtons();  //make sure the buttons are loaded
+  function subOne($event, id){
+	buttonApi.clickItem(id)
+	.success(function(){refreshTrans()})
+	.error(function(){$scope.errorMessage="Unable to remove item from transaction";});
+ }
 
+ function refreshTrans(){
+	loading = true;
+	buttonApi.getTrans()
+		.success(function(data){
+			$scope.transaction = data;
+			loading = false;
+		}).error(function() {
+			$scope.errorMessage="Failed to get transaction data";
+			loading = false;
+		});
+ }
+
+  refreshButtons();  //make sure the buttons are loaded
+  refreshTrans();
 }
 
 function buttonApi($http,apiUrl){
@@ -56,9 +74,14 @@ function buttonApi($http,apiUrl){
 
 //function transApi($http,apiURL){
 //  return{
-    getTransaction: function(){
+    getTrans: function(){
       var url = apiUrl + '/getTrans';
       return $http.get(url);
+    },
+    clickItem: function(id){
+       var url = apiUrl+'/removeItem?id=' + id;
+       console.log("attempting with url = " + url);
+       return $http.get(url);
     }
  };
 }

@@ -12,6 +12,7 @@ function ButtonCtrl($scope,buttonApi){
    $scope.buttonClick=buttonClick;
    $scope.refreshTrans=refreshTrans;
    $scope.subOne = subOne;
+   $scope.total = 0.0;
 
    var loading = false;
 
@@ -48,6 +49,8 @@ function ButtonCtrl($scope,buttonApi){
 	buttonApi.getTrans()
 		.success(function(data){
 			$scope.transaction = data;
+			$scope.total = $scope.transaction.reduce(
+				function(n, m){ return n + m.total; }, 0.0);
 			loading = false;
 		}).error(function() {
 			$scope.errorMessage="Failed to get transaction data";

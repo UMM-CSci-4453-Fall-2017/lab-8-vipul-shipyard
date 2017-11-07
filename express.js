@@ -41,7 +41,7 @@ var getDatabase = function(){
 var removeCol = function(ip){
 	var toReturn = "";
 	for(i = 0; i < ip.length; i++){
-		if (ip.charAt(i) != ":"){
+		if (ip.charAt(i) != ":" && ip.charAt(i) != "."){
 			toReturn = toReturn + ip.charAt(i);
 		}
 	}
